@@ -17,7 +17,7 @@ if ( !empty($_POST)) { // if not first time through
 	$mobileError = null;
 	$passwordError = null;
 	$titleError = null;
-    $filecontent = null;
+    	$filecontent = null;
 	
 	// initialize $_POST variables
 	$fname = $_POST['fname'];
@@ -27,12 +27,13 @@ if ( !empty($_POST)) { // if not first time through
 	$password = $_POST['password'];
 	$passwordhash = MD5($password);
 	$title =  $_POST['title'];
-    
-    $fileName = $_FILES['userfile']['name'];
-    $tmpName  = $_FILES['userfile']['tmp_name'];
-    $fileSize = $_FILES['userfile']['size'];
-    $fileType = $_FILES['userfile']['type'];
-    
+
+	// initialize $_FILES variables
+	$fileName = $_FILES['userfile']['name'];
+	$tmpName  = $_FILES['userfile']['tmp_name'];
+	$fileSize = $_FILES['userfile']['size'];
+	$fileType = $_FILES['userfile']['type'];
+	$content = file_get_contents($tmpName);
     
 	// validate user input
 	$valid = true;
@@ -87,8 +88,6 @@ if ( !empty($_POST)) { // if not first time through
 		$valid = false;
 	}
 
-	// insert data
-	$results = move_uploaded_file($fileName, $fileFullPath);
 	if ($valid) 
 	{
 		$pdo = Database::connect();
@@ -96,10 +95,10 @@ if ( !empty($_POST)) { // if not first time through
 		$pdo = Database::connect();
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$sql = "INSERT INTO persons (fname,lname,email,mobile,password,title,
-		filename,filesize,filetype) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		filename,filesize,filetype,filecontent) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		$q = $pdo->prepare($sql);
 		$q->execute(array($fname,$lname,$email,$mobile,$passwordhash,$title,
-		$fileName,$fileSize,$fileType));
+		$fileName,$fileSize,$fileType,$content));
 		Database::disconnect();
 		header("Location: fr_persons.php");
 	}
