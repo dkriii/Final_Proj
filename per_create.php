@@ -1,207 +1,85 @@
-<?php 
+<?php
 session_start();
-// if(!isset($_SESSION["person_id"])){ // if "user" not set,
-// 	session_destroy();
-// 	header('Location: login.php');     // go to login page
-// 	exit;
-// }
-	
-require 'database/database.php';
-
-if ( !empty($_POST)) { // if not first time through
-
-	// initialize user input validation variables
-	$fnameError = null;
-	$lnameError = null;
-	$emailError = null;
-	$mobileError = null;
-	$passwordError = null;
-	$titleError = null;
-    	$filecontent = null;
-	
-	// initialize $_POST variables
-	$fname = $_POST['fname'];
-	$lname = $_POST['lname'];
-	$email = $_POST['email'];
-	$mobile = $_POST['mobile'];
-	$password = $_POST['password'];
-	$passwordhash = MD5($password);
-	$title =  $_POST['title'];
-
-	// initialize $_FILES variables
-	$fileName = $_FILES['userfile']['name'];
-	$tmpName  = $_FILES['userfile']['tmp_name'];
-	$fileSize = $_FILES['userfile']['size'];
-	$fileType = $_FILES['userfile']['type'];
-	$content = file_get_contents($tmpName);
-    
-	// validate user input
-	$valid = true;
-	if (empty($fname)) {
-		$fnameError = 'Please enter First Name';
-		$valid = false;
-	}
-	if (empty($lname)) {
-		$lnameError = 'Please enter Last Name';
-		$valid = false;
-	}
-	// do not allow 2 records with same email address!
-	if (empty($email)) {
-		$emailError = 'Please enter valid Email Address (REQUIRED)';
-		$valid = false;
-	} else if ( !filter_var($email,FILTER_VALIDATE_EMAIL) ) {
-		$emailError = 'Please enter a valid Email Address';
-		$valid = false;
-	}
-	
-	$pdo = Database::connect();
-	$sql = "SELECT * FROM persons";
-	foreach($pdo->query($sql) as $row) {
-
-		if($email == $row['email']) {
-			$emailError = 'Email has already been registered!';
-			$valid = false;
-		}
-	}
-	Database::disconnect();
-
-	// email must contain only lower case letters
-	if (strcmp(strtolower($email),$email)!=0) {
-		$emailError = 'email address can contain only lower case letters';
-		$valid = false;
-	}
-
-	if (empty($mobile)) {
-		$mobileError = 'Please enter Mobile Number (or "none")';
-		$valid = false;
-	}
-	if(!preg_match("/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/", $mobile)) {
-		$mobileError = 'Please write Mobile Number in form 000-000-0000';
-		$valid = false;
-	}
-	if (empty($password)) {
-		$passwordError = 'Please enter valid Password';
-		$valid = false;
-	}
-	if (empty($title)) {
-		$titleError = 'Please enter valid Title';
-		$valid = false;
-	}
-
-	if ($valid) 
-	{
-		$pdo = Database::connect();
-		
-		$pdo = Database::connect();
-		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$sql = "INSERT INTO persons (fname,lname,email,mobile,password,title,
-		filename,filesize,filetype,filecontent) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		$q = $pdo->prepare($sql);
-		$q->execute(array($fname,$lname,$email,$mobile,$passwordhash,$title,
-		$fileName,$fileSize,$fileType,$content));
-		Database::disconnect();
-		header("Location: fr_persons.php");
-	}
+if(!isset($_SESSION["person_id"])){ // if "user" not set,
+	session_destroy();
+	header('Location: login.php');     // go to login page
+	exit;
 }
+$sessionid = $_SESSION['person_id'];
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <link   href="css/bootstrap.min.css" rel="stylesheet">
     <script src="js/bootstrap.min.js"></script>
-
+	<link rel="icon" href="cardinal_logo.png" type="image/png" />
 </head>
 
-<body>
+<body style="background-color: lightblue !important";>
     <div class="container">
-    
-		<div class="span10 offset1">
-		
-			<div class="row">
-				<h3>Add New Student</h3>
-			</div>
-	
-			<form class="form-horizontal" action="per_create.php" method="post" enctype="multipart/form-data">
 
-				<div class="control-group <?php echo !empty($fnameError)?'error':'';?>">
-					<label class="control-label">First Name</label>
-					<div class="controls">
-						<input name="fname" type="text"  placeholder="First Name" value="<?php echo !empty($fname)?$fname:'';?>">
-						<?php if (!empty($fnameError)): ?>
-							<span class="help-inline"><?php echo $fnameError;?></span>
-						<?php endif; ?>
-					</div>
-				</div>
+		<div class="row">
+			<h3>Students</h3>
+		</div>
+		<div class="row">
+			<p>
+				<?php if($_SESSION['person_title']=='Administrator')
+					echo '<a href="per_create.php" class="btn btn-primary">Add Student</a>';
+				?>
+				<a href="logout.php" class="btn btn-warning">Logout</a> &nbsp;&nbsp;&nbsp;
+				<a href="persons.php">Students</a> &nbsp;
+				<a href="utilities.php">Utilities</a> &nbsp;
+				<a href="rented.php">AllRentals</a>&nbsp;
+				<a href="rented.php?id=<?php echo $sessionid; ?>">MyRentals</a>&nbsp;
+			</p>
 				
-				<div class="control-group <?php echo !empty($lnameError)?'error':'';?>">
-					<label class="control-label">Last Name</label>
-					<div class="controls">
-						<input name="lname" type="text"  placeholder="Last Name" value="<?php echo !empty($lname)?$lname:'';?>">
-						<?php if (!empty($lnameError)): ?>
-							<span class="help-inline"><?php echo $lnameError;?></span>
-						<?php endif; ?>
-					</div>
-				</div>
-				
-				<div class="control-group <?php echo !empty($emailError)?'error':'';?>">
-					<label class="control-label">Email</label>
-					<div class="controls">
-						<input name="email" type="text" placeholder="Email Address" value="<?php echo !empty($email)?$email:'';?>">
-						<?php if (!empty($emailError)): ?>
-							<span class="help-inline"><?php echo $emailError;?></span>
-						<?php endif;?>
-					</div>
-				</div>
-				
-				<div class="control-group <?php echo !empty($mobileError)?'error':'';?>">
-					<label class="control-label">Mobile Number</label>
-					<div class="controls">
-						<input name="mobile" type="text"  placeholder="Mobile Phone Number" value="<?php echo !empty($mobile)?$mobile:'';?>">
-						<?php if (!empty($mobileError)): ?>
-							<span class="help-inline"><?php echo $mobileError;?></span>
-						<?php endif;?>
-					</div>
-				</div>
-				
-				<div class="control-group <?php echo !empty($passwordError)?'error':'';?>">
-					<label class="control-label">Password</label>
-					<div class="controls">
-						<input id="password" name="password" type="text"  placeholder="Password" value="<?php echo !empty($password)?$password:'';?>">
-						<?php if (!empty($passwordError)): ?>
-							<span class="help-inline"><?php echo $passwordError;?></span>
-						<?php endif;?>
-					</div>
-				</div>
-				
-				<div class="control-group">
-					<label class="control-label">Title</label>
-					<div class="controls">
-						<select class="form-control" name="title">
-							<option value="Student" selected>Student</option>
-							<option value="Administrator" >Administrator</option>
-						</select>
-					</div>
-				</div>
-			  
-				<div class="control-group <?php echo !empty($pictureError)?'error':'';?>">
-					<label class="control-label">Picture</label>
-					<div class="controls">
-						<input type="hidden" name="MAX_FILE_SIZE" value="16000000">
-						<input name="userfile" type="file" id="userfile">
-					</div>
-				</div>
-			  
-				<div class="form-actions">
-					<button type="submit" class="btn btn-success">Create</button>
-					<a class="btn" href="persons.php">Back</a>
-				</div>
-				
-			</form>
+			<table class="table table-striped table-bordered" style="background-color: lightgrey !important">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Mobile</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php 
+						include 'database/database.php';
+						$pdo = Database::connect();
+						$sql = 'SELECT `persons`.*, COUNT(`rentals`.rent_per_id) AS countAssigns FROM `persons` LEFT OUTER JOIN `rentals` ON (`persons`.id=`rentals`.rent_per_id) GROUP BY `persons`.id ORDER BY `persons`.lname ASC, `persons`.fname ASC';
+						//$sql = 'SELECT * FROM fr_persons ORDER BY `fr_persons`.lname ASC, `fr_persons`.fname ASC';
+						foreach ($pdo->query($sql) as $row) {
+							echo '<tr>';
+							echo "<td><img src='uploads/".$row['image']."'></td>";
+							if ($row['countAssigns'] == 0)
+								echo '<td>'. trim($row['lname']) . ', ' . trim($row['fname']) . ' (' . substr($row['title'], 0, 1) . ') '.' - Not Renting</td>';
+							else
+								echo '<td>'. trim($row['lname']) . ', ' . trim($row['fname']) . ' (' . substr($row['title'], 0, 1) . ') - '.$row['countAssigns']. ' Renting</td>';
+							echo '<td>'. $row['email'] . '</td>';
+							echo '<td>'. $row['mobile'] . '</td>';
+							echo '<td width=250>';
+							# always allow read
+							echo '<a class="btn" href="per_read.php?id='.$row['id'].'">Details</a>&nbsp;';
+							# person can update own record
+							if ($_SESSION['person_title']=='Administrator'
+								|| $_SESSION['person_id']==$row['id'])
+								echo '<a class="btn btn-success" href="per_update.php?id='.$row['id'].'">Update</a>&nbsp;';
+							# only admins can delete
+							if ($_SESSION['person_title']=='Administrator')
+								echo '<a class="btn btn-danger" href="per_delete.php?id='.$row['id'].'">Delete</a>';
+							if($_SESSION["person_id"] == $row['id']) 
+								echo " &nbsp;&nbsp;Me";
+							echo '</td>';
+							echo '</tr>';
+						}
+						Database::disconnect();
+					?>
+				</tbody>
+			</table>
 			
-		</div> <!-- end div: class="span10 offset1" -->
-				
-    </div> <!-- end div: class="container" -->
+    	</div>
+    </div> <!-- /container -->
   </body>
 </html>
+
