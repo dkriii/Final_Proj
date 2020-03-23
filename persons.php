@@ -13,7 +13,6 @@ $sessionid = $_SESSION['person_id'];
     <meta charset="utf-8">
     <link   href="css/bootstrap.min.css" rel="stylesheet">
     <script src="js/bootstrap.min.js"></script>
-	<link rel="icon" href="cardinal_logo.png" type="image/png" />
 </head>
 
 <body style="background-color: lightblue !important";>
@@ -37,6 +36,7 @@ $sessionid = $_SESSION['person_id'];
 			<table class="table table-striped table-bordered" style="background-color: lightgrey !important">
 				<thead>
 					<tr>
+					    <th>Picture</th>
 						<th>Name</th>
 						<th>Email</th>
 						<th>Mobile</th>
@@ -51,7 +51,9 @@ $sessionid = $_SESSION['person_id'];
 						//$sql = 'SELECT * FROM fr_persons ORDER BY `fr_persons`.lname ASC, `fr_persons`.fname ASC';
 						foreach ($pdo->query($sql) as $row) {
 							echo '<tr>';
-							echo "<td><img src='uploads/".$row['image']."'></td>";
+							echo '<td>' .$row['filename'] . '<img width=100 src="data:image/jpeg;base64,'
+                                .base64_encode( $row['filecontent'] ).'"/>'
+                                . '<br><br></td>';
 							if ($row['countAssigns'] == 0)
 								echo '<td>'. trim($row['lname']) . ', ' . trim($row['fname']) . ' (' . substr($row['title'], 0, 1) . ') '.' - Not Renting</td>';
 							else
