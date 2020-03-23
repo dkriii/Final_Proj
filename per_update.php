@@ -31,7 +31,14 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 	$mobile = $_POST['mobile'];
 	$password = $_POST['password'];
 	$title =  $_POST['title'];
-
+	
+	
+	$fileName = $_FILES['userfile']['name'];
+	$tmpName  = $_FILES['userfile']['tmp_name'];
+	$fileSize = $_FILES['userfile']['size'];
+	$fileType = $_FILES['userfile']['type'];
+	$content = file_get_contents($tmpName);
+	
 
 	// validate user input
 	$valid = true;
@@ -77,15 +84,24 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 	// restrict file types for upload
 	
 	if ($valid) { // if valid user input update the database
-         // otherwise, update all fields EXCEPT file fields
+        		if($fileSize > 0) { // if file was updated, update all fields
+			$pdo = Database::connect();
+			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$sql = "UPDATE persons  set fname = ?, lname = ?, email = ?, mobile = ?, password = ?, title = ?, filename = ?,filesize = ?,filetype = ?,filecontent = ? WHERE id = ?";
+			$q = $pdo->prepare($sql);
+			$q->execute(array($fname, $lname, $email, $mobile, $password, $title, $fileName,$fileSize,$fileType,$content, $id));
+			Database::disconnect();
+			header("Location: persons.php");
+		}
+		else { // otherwise, update all fields EXCEPT file fields
 			$pdo = Database::connect();
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$sql = "UPDATE persons  set fname = ?, lname = ?, email = ?, mobile = ?, password = ?, title = ? WHERE id = ?";
 			$q = $pdo->prepare($sql);
 			$q->execute(array($fname, $lname, $email, $mobile, $password, $title,  $id));
 			Database::disconnect();
-			header("Location: persons.php");
-		
+			header("Location: fr_persons.php");
+		}
 	}
 } else { // if $_POST NOT filled then pre-populate the form
 	$pdo = Database::connect();
@@ -194,7 +210,14 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 						</select>
 					</div>
 				</div>
-
+				
+				<div class="control-group <?php echo !empty($pictureError)?'error':'';?>">
+					<label class="control-label">Picture</label>
+					<div class="controls">
+						<input type="hidden" name="MAX_FILE_SIZE" value="16000000">
+						<input name="userfile" type="file" id="userfile">
+					</div>
+				</div
 			  
 				<div class="form-actions">
 					<button type="submit" class="btn btn-success">Update</button>
@@ -202,6 +225,17 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 				</div>
 				
 			</form>
+			<div class='control-group col-md-6'>
+					<div class="controls ">
+					<?php 
+					if ($data['filesize'] > 0) 
+						echo '<img  height=5%; width=15%; src="data:image/jpeg;base64,' . 
+							base64_encode( $data['filecontent'] ) . '" />'; 
+					else 
+						echo 'No photo on file.';
+					?><!-- converts to base 64 due to the need to read the binary files code and display img -->
+					</div>
+				</div>
 
 				
 		</div><!-- end div: class="span10 offset1" -->
