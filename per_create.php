@@ -34,13 +34,7 @@ if ( !empty($_POST)) { // if not first time through
 	$fileSize = $_FILES['userfile']['size'];
 	$fileType = $_FILES['userfile']['type'];
     $content = file_get_contents($tmpName);
-    
-    $fileLocation = "uploads/";
-    $fileFullPath = $fileLocation . $fileName;
-    if (!file_exists($fileLocation))
-        mkdir ($fileLocation); // create subdirectory, if necessary
-    
-    
+
     if($content == null){
         echo "error";
     }
