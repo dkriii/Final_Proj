@@ -51,9 +51,7 @@ $sessionid = $_SESSION['person_id'];
 						//$sql = 'SELECT * FROM fr_persons ORDER BY `fr_persons`.lname ASC, `fr_persons`.fname ASC';
 						foreach ($pdo->query($sql) as $row) {
 							echo '<tr>';
-							echo '<td>' .$row['filename'] . '<img width=100 src="data:image/jpeg;base64,'
-                                .base64_encode( $row['filecontent'] ).'"/>'
-                                . '<br><br></td>';
+							echo '<td>' .$row['filename'] . '<img width=100 src="data:image/jpeg;base64,'.base64_encode( $row['filecontent'] ).'"/>'. '<br><br></td>';
 							if ($row['countAssigns'] == 0)
 								echo '<td>'. trim($row['lname']) . ', ' . trim($row['fname']) . ' (' . substr($row['title'], 0, 1) . ') '.' - Not Renting</td>';
 							else
