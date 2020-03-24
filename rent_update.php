@@ -12,7 +12,6 @@ $id = $_GET['id'];
 if ( !empty($_POST)) { // if $_POST filled then process the form
 	
 	# same as create
-
 	// initialize user input validation variables
 	$personError = null;
 	$utilitytError = null;
@@ -20,37 +19,45 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 	// initialize $_POST variables
 	$person = $_POST['person_id'];    // same as HTML name= attribute in put box
 	$utility = $_POST['utility_id'];
-	
-	// validate user input
+	echo ' person ' . $person;
+	echo ' utility ' . $utility;
+
+
+// 	// validate user input
 	$valid = true;
-	if (empty($person)) {
-		$personError = 'Please choose a student';
-		$valid = false;
-	}
-	if (empty($event)) {
-		$utilityError = 'Please choose a utility';
-		$valid = false;
-	} 
+// 	if (empty($person)) {
+// 		$personError = 'Please choose a student';
+// 		$valid = false;
+// 	}
+// 	if (empty($event)) {
+// 		$utilityError = 'Please choose a utility';
+// 		$valid = false;
+// 	} 
 		
 	if ($valid) { // if valid user input update the database
+		echo 'id??? = ' . $id;
 		$pdo = Database::connect();
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$sql = "UPDATE rentals set rent_per_id = ?, rent_utility_id = ? WHERE id = ?";
+
 		$q = $pdo->prepare($sql);
 		$q->execute(array($person,$utility,$id));
 		Database::disconnect();
-		header("Location: rented.php");
-	}
-} else { // if $_POST NOT filled then pre-populate the form
-	$pdo = Database::connect();
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$sql = "SELECT * FROM rentals where id = ?";
-	$q = $pdo->prepare($sql);
-	$q->execute(array($id));
-	$data = $q->fetch(PDO::FETCH_ASSOC);
-	$person = $data['rent_per_id'];
-	$event = $data['rent_utility_id'];
-	Database::disconnect();
+		$URL="rented.php";
+        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+        echo '<META HTTP-EQUIV="refresh" content=";URL=' . $URL . '">';
+    }
+    else { // if $_POST NOT filled then pre-populate the form
+    	$pdo = Database::connect();
+    	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    	$sql = "SELECT * FROM rentals where id = ?";
+    	$q = $pdo->prepare($sql);
+    	$q->execute(array($id));
+    	$data = $q->fetch(PDO::FETCH_ASSOC);
+    	$person = $data['rent_per_id'];
+    	$event = $data['rent_utility_id'];
+    	Database::disconnect();
+    }
 }
 ?>
 
