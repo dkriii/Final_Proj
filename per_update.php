@@ -84,14 +84,16 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 	// restrict file types for upload
 	
 	if ($valid) { // if valid user input update the database
-        		if($fileSize > 0) { // if file was updated, update all fields
+        if($fileSize > 0) { // if file was updated, update all fields
 			$pdo = Database::connect();
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$sql = "UPDATE persons  set fname = ?, lname = ?, email = ?, mobile = ?, password = ?, title = ?, filename = ?,filesize = ?,filetype = ?,filecontent = ? WHERE id = ?";
 			$q = $pdo->prepare($sql);
 			$q->execute(array($fname, $lname, $email, $mobile, $password, $title, $fileName,$fileSize,$fileType,$content, $id));
 			Database::disconnect();
-			header("Location: persons.php");
+            $URL="persons.php";
+            echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+            echo '<META HTTP-EQUIV="refresh" content=";URL=' . $URL . '">';
 		}
 		else { // otherwise, update all fields EXCEPT file fields
 			$pdo = Database::connect();
@@ -100,7 +102,9 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 			$q = $pdo->prepare($sql);
 			$q->execute(array($fname, $lname, $email, $mobile, $password, $title,  $id));
 			Database::disconnect();
-			header("Location: fr_persons.php");
+            $URL="persons.php";
+            echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+            echo '<META HTTP-EQUIV="refresh" content=";URL=' . $URL . '">';
 		}
 	}
 } else { // if $_POST NOT filled then pre-populate the form
