@@ -6,7 +6,7 @@ if(!isset($_SESSION["person_id"])){ // if "user" not set,
 	header('Location: login.php');     // go to login page
 	exit;
 }
-	
+
 require 'database/database.php';
 
 $id = $_GET['id'];
@@ -37,8 +37,11 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 	$tmpName  = $_FILES['userfile']['tmp_name'];
 	$fileSize = $_FILES['userfile']['size'];
 	$fileType = $_FILES['userfile']['type'];
-	$content = file_get_contents($tmpName);
-	
+	if($tmpName != null)
+	    $content = file_get_contents($tmpName);
+    else{
+        $content = 0;
+    }	
 
 	// validate user input
 	$valid = true;
@@ -91,6 +94,7 @@ if ( !empty($_POST)) { // if $_POST filled then process the form
 			$q = $pdo->prepare($sql);
 			$q->execute(array($fname, $lname, $email, $mobile, $password, $title, $fileName,$fileSize,$fileType,$content, $id));
 			Database::disconnect();
+			error_reporting(E_ERROR | E_WARNING | E_PARSE);	
             $URL="persons.php";
             echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
             echo '<META HTTP-EQUIV="refresh" content=";URL=' . $URL . '">';
