@@ -5,8 +5,9 @@ if(!isset($_SESSION["person_id"])){ // if "user" not set,
 	header('Location: login.php');   // go to login page
 	exit;
 }
-
-$id = $_GET['id']; // for MyRentals
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+$id = $_GET['id'];  
+// for MyRentals
 $sessionid = $_SESSION['person_id'];
 ?>
 <!DOCTYPE html>
