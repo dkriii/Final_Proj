@@ -10,20 +10,20 @@ require 'database/database.php';
 
 $id = $_GET['id'];
 
+
 if ( !empty($_POST)) { // if user clicks "yes" (sure to delete), delete record
 
 	$id = $_POST['id'];
-	
 	// delete data
 	$pdo = Database::connect();
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$sql = "DELETE FROM assignments  WHERE id = ?";
+	$sql = "DELETE FROM rentals  WHERE id = ?";
 	$q = $pdo->prepare($sql);
 	$q->execute(array($id));
 	Database::disconnect();
     $URL="rented.php";
     echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
-    echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+    echo '<META HTTP-EQUIV="refresh" content=";URL=' . $URL . '">';
 } 
 else { // otherwise, pre-populate fields to show data to be deleted
 
@@ -47,7 +47,6 @@ else { // otherwise, pre-populate fields to show data to be deleted
 	$q = $pdo->prepare($sql);
 	$q->execute(array($data['rent_utility_id']));
 	$utilitydata = $q->fetch(PDO::FETCH_ASSOC);
-	
 	Database::disconnect();
 }
 ?>
